@@ -135,9 +135,9 @@ class ViewController: UIViewController {
     
     private var currentState: State = .closed
     
-    private var transitionAnimator = UIViewPropertyAnimator()
+    private var runningAnimators = [UIViewPropertyAnimator]()
     
-    private var animationProgress: CGFloat = 0
+    private var animationProgress = [CGFloat]()
     
     private lazy var panRecognizer: InstantPanGestureRecognizer = {
         let recognizer = InstantPanGestureRecognizer()
@@ -146,8 +146,8 @@ class ViewController: UIViewController {
     }()
     
     private func animateTransitionIfNeeded(to state: State, duration: TimeInterval) {
-        if transitionAnimator.isRunning { return }
-        transitionAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 1, animations: {
+        guard runningAnimators.isEmpty else { return }
+        let transitionAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 1, animations: {
             switch state {
             case .open:
                 self.bottomConstraint.constant = 0
@@ -183,38 +183,42 @@ class ViewController: UIViewController {
             case .closed:
                 self.bottomConstraint.constant = self.popupOffset
             }
+            self.runningAnimators.removeAll()
         }
         transitionAnimator.startAnimation()
+        runningAnimators.append(transitionAnimator)
     }
     
     @objc private func popupViewPanned(recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
         case .began:
             animateTransitionIfNeeded(to: currentState.opposite, duration: 1)
-            transitionAnimator.pauseAnimation()
-            animationProgress = transitionAnimator.fractionComplete
+            runningAnimators.forEach { $0.pauseAnimation() }
+            animationProgress = runningAnimators.map { $0.fractionComplete }
         case .changed:
             let translation = recognizer.translation(in: popupView)
             var fraction = -translation.y / popupOffset
             if currentState == .open { fraction *= -1 }
-            if transitionAnimator.isReversed { fraction *= -1 }
-            transitionAnimator.fractionComplete = fraction + animationProgress
+            if runningAnimators[0].isReversed { fraction *= -1 }
+            for (index, animator) in runningAnimators.enumerated() {
+                animator.fractionComplete = fraction + animationProgress[index]
+            }
         case .ended:
             let yVelocity = recognizer.velocity(in: popupView).y
             let shouldClose = yVelocity > 0
             if yVelocity == 0 {
-                transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+                runningAnimators.forEach { $0.continueAnimation(withTimingParameters: nil, durationFactor: 0) }
                 break
             }
             switch currentState {
             case .open:
-                if !shouldClose && !transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
-                if shouldClose && transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
+                if !shouldClose && !runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+                if shouldClose && runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
             case .closed:
-                if shouldClose && !transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
-                if !shouldClose && transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
+                if shouldClose && !runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+                if !shouldClose && runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
             }
-            transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+            runningAnimators.forEach { $0.continueAnimation(withTimingParameters: nil, durationFactor: 0) }
         default:
             ()
         }
