@@ -59,6 +59,17 @@ class ViewController: UIViewController {
         return label
     }()
     
+    private lazy var openTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Reviews"
+        label.font = UIFont.systemFont(ofSize: 24, weight: UIFont.Weight.heavy)
+        label.textColor = .black
+        label.textAlignment = .center
+        label.alpha = 0
+        label.transform = CGAffineTransform(scaleX: 0.65, y: 0.65).concatenating(CGAffineTransform(translationX: 0, y: -15))
+        return label
+    }()
+    
     private lazy var reviewsImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = #imageLiteral(resourceName: "reviews")
@@ -107,6 +118,12 @@ class ViewController: UIViewController {
         closedTitleLabel.trailingAnchor.constraint(equalTo: popupView.trailingAnchor).isActive = true
         closedTitleLabel.topAnchor.constraint(equalTo: popupView.topAnchor, constant: 20).isActive = true
         
+        openTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        popupView.addSubview(openTitleLabel)
+        openTitleLabel.leadingAnchor.constraint(equalTo: popupView.leadingAnchor).isActive = true
+        openTitleLabel.trailingAnchor.constraint(equalTo: popupView.trailingAnchor).isActive = true
+        openTitleLabel.topAnchor.constraint(equalTo: popupView.topAnchor, constant: 30).isActive = true
+        
         reviewsImageView.translatesAutoresizingMaskIntoConstraints = false
         popupView.addSubview(reviewsImageView)
         reviewsImageView.leadingAnchor.constraint(equalTo: popupView.leadingAnchor).isActive = true
@@ -136,10 +153,18 @@ class ViewController: UIViewController {
                 self.bottomConstraint.constant = 0
                 self.popupView.layer.cornerRadius = 20
                 self.overlayView.alpha = 0.5
+                self.closedTitleLabel.transform = CGAffineTransform(scaleX: 1.6, y: 1.6).concatenating(CGAffineTransform(translationX: 0, y: 15))
+                self.openTitleLabel.transform = .identity
+                self.openTitleLabel.alpha = 1
+                self.closedTitleLabel.alpha = 0
             case .closed:
                 self.bottomConstraint.constant = self.popupOffset
                 self.popupView.layer.cornerRadius = 0
                 self.overlayView.alpha = 0
+                self.closedTitleLabel.transform = .identity
+                self.openTitleLabel.transform = CGAffineTransform(scaleX: 0.65, y: 0.65).concatenating(CGAffineTransform(translationX: 0, y: -15))
+                self.openTitleLabel.alpha = 0
+                self.closedTitleLabel.alpha = 1
             }
             self.view.layoutIfNeeded()
         })
