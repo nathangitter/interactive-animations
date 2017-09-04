@@ -55,6 +55,8 @@ class ViewController: UIViewController {
     
     private var transitionAnimator = UIViewPropertyAnimator()
     
+    private var animationProgress: CGFloat = 0
+    
     private lazy var tapRecognizer: UITapGestureRecognizer = {
         let recognizer = UITapGestureRecognizer()
         recognizer.addTarget(self, action: #selector(popupViewTapped(recognizer:)))
@@ -106,11 +108,12 @@ class ViewController: UIViewController {
         case .began:
             animateTransitionIfNeeded(to: currentState.opposite, duration: 1.5)
             transitionAnimator.pauseAnimation()
+            animationProgress = transitionAnimator.fractionComplete
         case .changed:
             let translation = recognizer.translation(in: popupView)
             var fraction = -translation.y / popupOffset
             if currentState == .open { fraction *= -1 }
-            transitionAnimator.fractionComplete = fraction
+            transitionAnimator.fractionComplete = fraction + animationProgress
         case .ended:
             transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
         default:
