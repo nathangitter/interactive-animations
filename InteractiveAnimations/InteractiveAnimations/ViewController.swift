@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import UIKit.UIGestureRecognizerSubclass
 
 private enum State {
     case closed
@@ -35,7 +36,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         layout()
-        popupView.addGestureRecognizer(tapRecognizer)
         popupView.addGestureRecognizer(panRecognizer)
     }
     
@@ -57,14 +57,8 @@ class ViewController: UIViewController {
     
     private var animationProgress: CGFloat = 0
     
-    private lazy var tapRecognizer: UITapGestureRecognizer = {
-        let recognizer = UITapGestureRecognizer()
-        recognizer.addTarget(self, action: #selector(popupViewTapped(recognizer:)))
-        return recognizer
-    }()
-    
-    private lazy var panRecognizer: UIPanGestureRecognizer = {
-        let recognizer = UIPanGestureRecognizer()
+    private lazy var panRecognizer: InstantPanGestureRecognizer = {
+        let recognizer = InstantPanGestureRecognizer()
         recognizer.addTarget(self, action: #selector(popupViewPanned(recognizer:)))
         return recognizer
     }()
@@ -99,10 +93,6 @@ class ViewController: UIViewController {
         transitionAnimator.startAnimation()
     }
     
-    @objc private func popupViewTapped(recognizer: UITapGestureRecognizer) {
-        animateTransitionIfNeeded(to: currentState.opposite, duration: 1.5)
-    }
-    
     @objc private func popupViewPanned(recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
         case .began:
@@ -119,6 +109,16 @@ class ViewController: UIViewController {
         default:
             ()
         }
+    }
+    
+}
+
+class InstantPanGestureRecognizer: UIPanGestureRecognizer {
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        if (self.state == UIGestureRecognizerState.began) { return }
+        super.touchesBegan(touches, with: event)
+        self.state = UIGestureRecognizerState.began
     }
     
 }
