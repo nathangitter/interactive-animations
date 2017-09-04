@@ -155,16 +155,12 @@ class ViewController: UIViewController {
                 self.overlayView.alpha = 0.5
                 self.closedTitleLabel.transform = CGAffineTransform(scaleX: 1.6, y: 1.6).concatenating(CGAffineTransform(translationX: 0, y: 15))
                 self.openTitleLabel.transform = .identity
-                self.openTitleLabel.alpha = 1
-                self.closedTitleLabel.alpha = 0
             case .closed:
                 self.bottomConstraint.constant = self.popupOffset
                 self.popupView.layer.cornerRadius = 0
                 self.overlayView.alpha = 0
                 self.closedTitleLabel.transform = .identity
                 self.openTitleLabel.transform = CGAffineTransform(scaleX: 0.65, y: 0.65).concatenating(CGAffineTransform(translationX: 0, y: -15))
-                self.openTitleLabel.alpha = 0
-                self.closedTitleLabel.alpha = 1
             }
             self.view.layoutIfNeeded()
         })
@@ -185,8 +181,30 @@ class ViewController: UIViewController {
             }
             self.runningAnimators.removeAll()
         }
+        let inTitleAnimator = UIViewPropertyAnimator(duration: duration, curve: .easeIn, animations: {
+            switch state {
+            case .open:
+                self.openTitleLabel.alpha = 1
+            case .closed:
+                self.closedTitleLabel.alpha = 1
+            }
+        })
+        inTitleAnimator.scrubsLinearly = false
+        let outTitleAnimator = UIViewPropertyAnimator(duration: duration, curve: .easeOut, animations: {
+            switch state {
+            case .open:
+                self.closedTitleLabel.alpha = 0
+            case .closed:
+                self.openTitleLabel.alpha = 0
+            }
+        })
+        outTitleAnimator.scrubsLinearly = false
         transitionAnimator.startAnimation()
+        inTitleAnimator.startAnimation()
+        outTitleAnimator.startAnimation()
         runningAnimators.append(transitionAnimator)
+        runningAnimators.append(inTitleAnimator)
+        runningAnimators.append(outTitleAnimator)
     }
     
     @objc private func popupViewPanned(recognizer: UIPanGestureRecognizer) {
