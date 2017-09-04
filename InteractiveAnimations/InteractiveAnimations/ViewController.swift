@@ -27,11 +27,42 @@ class ViewController: UIViewController {
     
     private let popupOffset: CGFloat = 440
     
+    private lazy var contentImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = #imageLiteral(resourceName: "content")
+        return imageView
+    }()
+    
+    private lazy var overlayView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .black
+        view.alpha = 0
+        return view
+    }()
+    
     private lazy var popupView: UIView = {
         let view = UIView()
-        view.backgroundColor = .gray
+        view.backgroundColor = .white
         view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 0.1
+        view.layer.shadowRadius = 10
         return view
+    }()
+    
+    private lazy var closedTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Reviews"
+        label.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.medium)
+        label.textColor = #colorLiteral(red: 0, green: 0.5898008943, blue: 1, alpha: 1)
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var reviewsImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = #imageLiteral(resourceName: "reviews")
+        return imageView
     }()
     
     override func viewDidLoad() {
@@ -40,9 +71,28 @@ class ViewController: UIViewController {
         popupView.addGestureRecognizer(panRecognizer)
     }
     
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+    
     private var bottomConstraint = NSLayoutConstraint()
     
     private func layout() {
+        
+        contentImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(contentImageView)
+        contentImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        contentImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        contentImageView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        contentImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(overlayView)
+        overlayView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        overlayView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        overlayView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        overlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
         popupView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(popupView)
         popupView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
@@ -50,6 +100,20 @@ class ViewController: UIViewController {
         bottomConstraint = popupView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: popupOffset)
         bottomConstraint.isActive = true
         popupView.heightAnchor.constraint(equalToConstant: 500).isActive = true
+        
+        closedTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        popupView.addSubview(closedTitleLabel)
+        closedTitleLabel.leadingAnchor.constraint(equalTo: popupView.leadingAnchor).isActive = true
+        closedTitleLabel.trailingAnchor.constraint(equalTo: popupView.trailingAnchor).isActive = true
+        closedTitleLabel.topAnchor.constraint(equalTo: popupView.topAnchor, constant: 20).isActive = true
+        
+        reviewsImageView.translatesAutoresizingMaskIntoConstraints = false
+        popupView.addSubview(reviewsImageView)
+        reviewsImageView.leadingAnchor.constraint(equalTo: popupView.leadingAnchor).isActive = true
+        reviewsImageView.trailingAnchor.constraint(equalTo: popupView.trailingAnchor).isActive = true
+        reviewsImageView.bottomAnchor.constraint(equalTo: popupView.bottomAnchor).isActive = true
+        reviewsImageView.heightAnchor.constraint(equalToConstant: 428).isActive = true
+        
     }
     
     private var currentState: State = .closed
@@ -71,9 +135,11 @@ class ViewController: UIViewController {
             case .open:
                 self.bottomConstraint.constant = 0
                 self.popupView.layer.cornerRadius = 20
+                self.overlayView.alpha = 0.5
             case .closed:
                 self.bottomConstraint.constant = self.popupOffset
                 self.popupView.layer.cornerRadius = 0
+                self.overlayView.alpha = 0
             }
             self.view.layoutIfNeeded()
         })
@@ -99,7 +165,7 @@ class ViewController: UIViewController {
     @objc private func popupViewPanned(recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
         case .began:
-            animateTransitionIfNeeded(to: currentState.opposite, duration: 1.5)
+            animateTransitionIfNeeded(to: currentState.opposite, duration: 1)
             transitionAnimator.pauseAnimation()
             animationProgress = transitionAnimator.fractionComplete
         case .changed:
