@@ -103,8 +103,23 @@ class ViewController: UIViewController {
             let translation = recognizer.translation(in: popupView)
             var fraction = -translation.y / popupOffset
             if currentState == .open { fraction *= -1 }
+            if transitionAnimator.isReversed { fraction *= -1 }
             transitionAnimator.fractionComplete = fraction + animationProgress
         case .ended:
+            let yVelocity = recognizer.velocity(in: popupView).y
+            let shouldClose = yVelocity > 0
+            if yVelocity == 0 {
+                transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+                break
+            }
+            switch currentState {
+            case .open:
+                if !shouldClose && !transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
+                if shouldClose && transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
+            case .closed:
+                if shouldClose && !transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
+                if !shouldClose && transitionAnimator.isReversed { transitionAnimator.isReversed = !transitionAnimator.isReversed }
+            }
             transitionAnimator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
         default:
             ()
