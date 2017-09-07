@@ -13,5 +13,10 @@ In the original talk, I would jump between commits to gradually introduce concep
 The animation is inspired by a WWDC 2017 presentation titled "Advanced Animations with UIKit".
 https://developer.apple.com/videos/play/wwdc2017/230/
 
+## Instructions
+
+This project was built with Xcode 9 Beta 6. To run, download/clone the repo and open `InteractiveAnimations.xcodeproj` in Xcode 9.
+
 ## License
+
 MIT © 2017 Nathan Gitter. See LICENSE for full details.
