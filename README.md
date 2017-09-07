@@ -1,5 +1,7 @@
 # interactive-animations
 
+![Animation Demo Gif](demo.gif)
+
 This project is an example of how to use `UIViewPropertyAnimator` to create interactive animations.
 This was originally created as a demo to accompany I talk I gave at an Austin iOS developer meetup in September, 2017.
 
