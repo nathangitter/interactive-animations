@@ -10,6 +10,8 @@ This was originally created as a demo to accompany a talk I gave at an Austin iO
 The repository's commits are structured to show the various phases of building the animation.
 In the original talk, I would jump between commits to gradually introduce concepts.
 
+I wrote a tutorial blog post on how to implement this animation step-by-step. It's available here: [Building Better iOS App Animations](http://www.swiftkickmobile.com/building-better-app-animations-swift-uiviewpropertyanimator/)
+
 The animation is inspired by a WWDC 2017 presentation titled "Advanced Animations with UIKit".
 https://developer.apple.com/videos/play/wwdc2017/230/
 
